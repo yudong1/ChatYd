@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Chat</title>
+    <link rel="icon" href="image/favicon.ico" type ="image/x-icon">
+    <!-- Axios -->
+    <script src="https://cdn.staticfile.org/axios/0.18.0/axios.min.js"></script>
+    <!-- 生产环境版本，优化了尺寸和速度 -->
+<!--    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>-->
+<!--    <script src="https://cdn.jsdelivr.net/npm/vue@2.7.14"></script>-->
+    <!-- import Vue before Element -->
+    <script src="https://unpkg.com/vue@2/dist/vue.js"></script>
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <!-- 引入组件库 -->
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+
+</head>
+<body>
+    <div id="app">
+        <div class="app-container" v-if="isPc">
+            <el-container>
+                <el-header>您好，欢迎来到yd的聊天框</el-header>
+                <el-main>
+                    <div style="margin-top: 10px; width: 80%; margin: auto;">
+                        <el-form :model="form">
+                            <el-form-item label="AI：" prop="textareaResponse">
+                                <el-input
+                                        type="textarea"
+                                        :rows="tableHeight"
+                                        placeholder="..."
+                                        v-model="textareaResponse"
+                                        @input="changeVersion">
+                                </el-input>
+                            </el-form-item>
+                            <el-form-item label="Me:">
+                                <el-input placeholder="发送消息给AI" v-model="sendMessage" class="input-with-select">
+                                    <el-button slot="append" icon="el-icon-position" @click="sendMessageClick" style="background-color: #abdfff" type="submit"></el-button>
+                                </el-input>
+                            </el-form-item>
+                        </el-form>
+                    </div>
+                </el-main>
+                <el-footer>每次响应需要时间，请等待不要重复发送！刷新界面可自适应大小！</el-footer>
+            </el-container>
+        </div>
+        <div class="app-container" v-else>
+            <el-container class="container_two">
+                <el-header style="font-size: 40px; height: 100px; line-height: 100px; color: #333; text-align: center;">您好，欢迎来到yd的聊天框</el-header>
+                <el-main>
+                    <div style="margin-top: 10px; width: 95%; margin: auto">
+                        <el-form :model="form">
+                            <el-form-item label="AI：" prop="textareaResponse">
+                                <el-input
+                                        type="textarea"
+                                        :rows="50"
+                                        :autosize="{ minRows: 50, maxRows: 60}"
+                                        placeholder="..."
+                                        v-model="textareaResponse"
+                                        @input="changeVersion"
+                                        style="font-size: 22px">
+                                </el-input>
+                            </el-form-item>
+                            <el-form-item label="Me:">
+                                <el-input placeholder="发送消息给AI" v-model="sendMessage" class="input-with-select">
+                                    <el-button
+                                            slot="append" icon="el-icon-position"
+                                            @click="sendMessageClick"
+                                            style="background-color: #abdfff; height:50px"
+                                            type="submit">
+                                    </el-button>
+                                </el-input>
+                            </el-form-item>
+                        </el-form>
+                    </div>
+                </el-main>
+                <el-footer style="font-size: 40px; height: 100px; line-height: 100px; color: #333; text-align: center;">每次响应需要时间，请等待不要重复发送！</el-footer>
+            </el-container>
+        </div>
+    </div>
+</body>
+<script>
+    new Vue({
+        el: '#app',
+        name: "App",
+        data() {
+            return {
+                form: {
+                    textareaResponse: ""
+                },
+                sendMessage: "",
+                textareaResponse: "",
+                isPc: true,
+                tableHeight: null,
+            }
+        },
+        created() {
+            const that = this;
+            that.isPc = that.IsPC();
+            console.log("你好！欢迎来到zyd的ChatGPT！"+that.isPc)
+        },
+        mounted() {
+            const that = this;
+            this.$nextTick(() => {
+                // window.innerHeight 浏览器窗口的可见高度，下面的 220 是除了table最大高度的剩余空间。
+                let height = window.innerHeight - 330;
+                that.tableHeight = Math.round(height/25);
+            })
+        },
+        methods: {
+            sendMessageClick(){
+                const that = this;
+                axios({
+                    method: 'post',
+                    url: 'http://yudong.vip:80/chat',
+                    data: {
+                        message: this.sendMessage
+                    }
+                }).then(function (response) {
+                    // console.log("response.data = ", response.data);  http://yudong.vip:8080/chat
+                    // console.log("response.data = ", response.data.data.choices[0].text);
+                    if(response.data.code==200){
+                        that.textareaResponse = response.data.data.choices[0].text;
+                    }else {
+                        that.textareaResponse = response.data.msg;
+                    }
+                }).catch(function (error) {
+                    console.log("失败："+error);
+                });
+            },
+            changeVersion(newVersion){
+                this.textareaResponse="输入框在下面，请在下方输入你要问的问题！";
+            },
+            // 是pc端
+            IsPC() {
+                var userAgentInfo = navigator.userAgent;
+                var Agents = [
+                    "Android",
+                    "iPhone",
+                    "SymbianOS",
+                    "Windows Phone",
+                    "iPad",
+                    "iPod",
+                ];
+                var flag = true;
+                for (var v = 0; v < Agents.length; v++) {
+                    if (userAgentInfo.indexOf(Agents[v]) > 0) {
+                        flag = false;
+                        break;
+                    }
+                }
+                return flag;
+            },
+        }
+    })
+</script>
+<style lang="scss" scoped>
+
+    html,body,#app,.el-container{
+        height: 98vh;
+    }
+
+    .el-header, .el-footer {
+        background-color: #B3C0D1;
+        color: #333;
+        text-align: center;
+        line-height: 60px;
+    }
+
+    .el-main {
+        background-color: #E9EEF3;
+        color: #333;
+        text-align: center;
+        /*line-height: 260px;*/
+    }
+
+    body > .el-container {
+        margin-bottom: 40px;
+    }
+
+    .container_two .el-form-item__label {
+        font-size: 32px;
+    }
+    .container_two .el-input__inner {
+        height: 50px;
+        line-height: 50px;
+        font-size: 30px;
+
+    }
+
+    .el-select .el-input {
+        width: 130px;
+        height: 40px;
+    }
+    .input-with-select .el-input-group__prepend {
+        background-color: #fff;
+    }
+</style>
+</html>

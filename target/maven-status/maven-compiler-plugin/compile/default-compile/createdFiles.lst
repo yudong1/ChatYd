@@ -1,0 +1,7 @@
+com\yd\chatgpt\config\RestTemplateConfig.class
+com\yd\chatgpt\vo\MessageVo.class
+com\yd\chatgpt\common\Result.class
+com\yd\chatgpt\controller\ChatController.class
+com\yd\chatgpt\dto\TextDto.class
+com\yd\chatgpt\dto\ChatDto.class
+com\yd\chatgpt\ChatGptApplication.class
